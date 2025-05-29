@@ -16,13 +16,12 @@ import java.util.stream.Collectors;
 public class RoomService {
 
     private final RoomRepository roomRepository;
+    private final ReservationRepository reservationRepository;
 
     @Autowired
-    private ReservationRepository reservationRepository;
-
-    @Autowired
-    public RoomService(RoomRepository roomRepository) {
+    public RoomService(RoomRepository roomRepository, ReservationRepository reservationRepository) {
         this.roomRepository = roomRepository;
+        this.reservationRepository = reservationRepository;
     }
 
 //    public List<Room> findAvailableRooms(LocalDate dataCheckIn, LocalDate dataCheckOut, int numberOfPeople) {

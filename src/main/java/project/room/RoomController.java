@@ -31,14 +31,13 @@ public class RoomController {
 
     private final RoomService roomService;
     private final RoomRepository roomRepository;
+    private final ReservationRepository reservationRepository;
 
     @Autowired
-    private ReservationRepository reservationRepository;
-
-    @Autowired
-    public RoomController(RoomService roomService,RoomRepository roomRepository) {
+    public RoomController(RoomService roomService, RoomRepository roomRepository, ReservationRepository reservationRepository) {
         this.roomRepository = roomRepository;
         this.roomService = roomService;
+        this.reservationRepository = reservationRepository;
     }
 
     @GetMapping("/room/{roomId}/availability")

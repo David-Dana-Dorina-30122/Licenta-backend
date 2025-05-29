@@ -7,11 +7,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-import project.reservations.Reservation;
 import project.security.JwtService;
 import project.user.User;
 import project.user.UserRepository;
-import project.user.UserService;
 
 import java.security.Principal;
 import java.util.List;
@@ -22,15 +20,17 @@ import java.util.Optional;
 @CrossOrigin(origins = "http://localhost:4200")
 public class AddressController {
 
+    public final AddressService addressService;
+    public final UserRepository userRepository;
+    private final AddressRepository addressRepository;
+    private final JwtService jwtService;
 
-    @Autowired
-    public AddressService addressService;
-    @Autowired
-    public UserRepository userRepository;
-    @Autowired
-    private  AddressRepository addressRepository;
-    @Autowired
-    private JwtService jwtService;
+    public AddressController(AddressService addressService, UserRepository userRepository, AddressRepository addressRepository, JwtService jwtService) {
+        this.addressService = addressService;
+        this.userRepository = userRepository;
+        this.addressRepository = addressRepository;
+        this.jwtService = jwtService;
+    }
 
 
     @GetMapping
@@ -110,7 +110,7 @@ public class AddressController {
     }
 
     @PutMapping("/update")
-    public ResponseEntity<Address> updateAddress(@RequestBody Address updatedAddress, @AuthenticationPrincipal UserDetails user) {
+    public ResponseEntity<Address> updateAddress(@RequestBody Address updatedAddress, @AuthenticationPrincipal User user) {
         System.out.println("Received address: " + updatedAddress); // Log pentru verificare
         Address address = addressRepository.findByUser(user).orElseThrow();
         address.setStreet(updatedAddress.getStreet());

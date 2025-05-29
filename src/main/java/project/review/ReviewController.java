@@ -22,16 +22,19 @@ import java.util.Map;
 @RequestMapping("/reviews")
 public class ReviewController {
 
-    @Autowired
-    private ReviewService reviewService;
+    private final ReviewService reviewService;
 
-    @Autowired
-    private ReviewRepository reviewRepository;
+    private final ReviewRepository reviewRepository;
 
-    @Autowired
-    private  ReservationRepository reservationRepository;
-    @Autowired
-    private  UserRepository userRepository;
+    private final ReservationRepository reservationRepository;
+    private final UserRepository userRepository;
+
+    public ReviewController(ReviewService reviewService, ReviewRepository reviewRepository, ReservationRepository reservationRepository, UserRepository userRepository) {
+        this.reviewService = reviewService;
+        this.reviewRepository = reviewRepository;
+        this.reservationRepository = reservationRepository;
+        this.userRepository = userRepository;
+    }
 
     @PostMapping("/{reservationId}")
     public ResponseEntity<Review> addReview(

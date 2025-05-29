@@ -25,20 +25,22 @@ import java.util.List;
 import java.util.UUID;
 
 
-@Service // creates one instance of this class
-@Slf4j // adds the 'log(ger)' instance to this class
-
+@Service
+@Slf4j
 @Transactional
 public class ReservationService {
 
-    @Autowired
-    private ReservationRepository reservationRepository;
+    private final ReservationRepository reservationRepository;
 
-    @Autowired
-    private  UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    @Autowired
-    private RoomRepository roomRepository;
+    private final RoomRepository roomRepository;
+
+    public ReservationService(ReservationRepository reservationRepository, UserRepository userRepository, RoomRepository roomRepository) {
+        this.reservationRepository = reservationRepository;
+        this.userRepository = userRepository;
+        this.roomRepository = roomRepository;
+    }
 
 
     public Reservation createReservationForUser(ReservationDTO dto, String username) {

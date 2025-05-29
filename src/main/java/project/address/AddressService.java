@@ -1,28 +1,21 @@
 package project.address;
 
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import project.user.User;
 import project.user.UserRepository;
-
-
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
-
 public class AddressService {
 
-    @Autowired
     private final AddressRepository addressRepository;
-    @Autowired
-    private  UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    public AddressService(AddressRepository addressRepository) {
+    public AddressService( AddressRepository addressRepository, UserRepository userRepository) {
         this.addressRepository = addressRepository;
+        this.userRepository = userRepository;
     }
 
     public Address create(Address address) {
