@@ -14,6 +14,7 @@ public class CorsConfig {
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")  // Permite acces la toate endpoint-urile
                         .allowedOrigins("http://localhost:4200")  // Permite doar din Angular
+                        .allowedOrigins("https://frontend-url-render.com")
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")  // Permite metodele HTTP
                         .allowedHeaders("*")
                         .allowCredentials(true);
