@@ -1,16 +1,13 @@
 package project.address;
 
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import project.security.JwtService;
 import project.user.User;
 import project.user.UserRepository;
-
 import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
@@ -45,11 +42,6 @@ public class AddressController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-//    @GetMapping("/me")
-//    public ResponseEntity<Address> getAddressForUser(@AuthenticationPrincipal UserDetails user) {
-//        Address address = addressRepository.findByUser(user).orElseThrow(() -> new RuntimeException("Address not found"));
-//        return ResponseEntity.ok(address);
-//    }
 
     @GetMapping("/me")
     public ResponseEntity<?> getMyAddress(Principal principal) {

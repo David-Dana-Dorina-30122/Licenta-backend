@@ -1,7 +1,6 @@
 package project.user;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -11,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
 import project.reservations.ReservationRepository;
-
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -19,23 +17,17 @@ import java.util.List;
 @Service
 public class UserService implements UserDetailsService {
 
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-    @Autowired
-    private PlatformTransactionManager transactionManager;
-    @Autowired
-    private ReservationRepository reservationRepository;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final PlatformTransactionManager transactionManager;
+    private final ReservationRepository reservationRepository;
 
-    //private final TransactionTemplate transactionTemplate;
-
-//    @PersistenceContext
-//    private EntityManager entityManager;
-//
-//    public UserService(PlatformTransactionManager transactionManager) {
-//        this.transactionTemplate = new TransactionTemplate(transactionManager);
-//    }
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, PlatformTransactionManager transactionManager, ReservationRepository reservationRepository) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.transactionManager = transactionManager;
+        this.reservationRepository = reservationRepository;
+    }
 
     public User create(User user) {
         return userRepository.save(user);
@@ -99,9 +91,19 @@ public class UserService implements UserDetailsService {
         LocalDateTime now = LocalDateTime.now();
         List<User> expiredUsers = userRepository.findByVerificationCodeExpiresAtBefore(now);
         for (User user : expiredUsers) {
-         //   reservationRepository.deleteByUserId(user.getId());
             userRepository.deleteById(user.getId());
         }
     }
+
+    public User findOrCreateExternalUser(String email) {
+        return userRepository.findByEmail(email).orElseGet(() -> {
+            User user = new User();
+            user.setEmail(email);
+            user.setPassword("external");
+            user.setEnabled(true);
+            return userRepository.save(user);
+        });
+    }
+
 }
 

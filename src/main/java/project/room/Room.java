@@ -1,14 +1,12 @@
 package project.room;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import project.reservations.Reservation;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,7 +35,7 @@ public class Room {
 
     @ElementCollection
     @CollectionTable(name = "room_images", joinColumns = @JoinColumn(name = "room_id"))
-    @Column(name = "image_url")
+    @Column(name = "image_url",length = 1000)
     private List<String> imageUrls = new ArrayList<>();
 
 

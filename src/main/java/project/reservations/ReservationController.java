@@ -1,6 +1,8 @@
 package project.reservations;
 
-import project.reservations.ReservationRepository;
+
+import jakarta.mail.MessagingException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +24,7 @@ public class ReservationController {
     private final ReservationService reservationService;
     private final ReservationRepository reservationRepository;
 
+    @Autowired
     public ReservationController(ReservationService reservationService, ReservationRepository reservationRepository) {
         this.reservationService = reservationService;
         this.reservationRepository = reservationRepository;
@@ -38,11 +41,10 @@ public class ReservationController {
         return ResponseEntity.ok(reservations);
     }
 
-
     @PostMapping("/create")
-    public ResponseEntity<Reservation> createReservation(
+    public ResponseEntity<Reservation> createReservation (
             @RequestBody ReservationDTO reservationDto,
-            @AuthenticationPrincipal UserDetails userDetails) {
+            @AuthenticationPrincipal UserDetails userDetails) throws MessagingException {
 
         String username = userDetails.getUsername();
         System.out.println("Username " + username);

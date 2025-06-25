@@ -3,12 +3,9 @@ package project.room;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import project.reservations.Reservation;
 import project.reservations.ReservationRepository;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,18 +21,8 @@ public class RoomService {
         this.reservationRepository = reservationRepository;
     }
 
-//    public List<Room> findAvailableRooms(LocalDate dataCheckIn, LocalDate dataCheckOut, int numberOfPeople) {
-//        List<Room> allRooms = roomRepository.findByCapacityGreaterThanEqual(numberOfPeople);
-//
-//        return allRooms.stream()
-//                .filter(room -> reservationRepository
-//                        .findConflictingReservations(room.getId(), java.sql.Date.valueOf(dataCheckIn), java.sql.Date.valueOf(dataCheckOut))
-//                        .isEmpty())
-//                .collect(Collectors.toList());
-//    }
-
-    public List<Room> findAvailableRooms(LocalDate dataCheckIn, LocalDate dataCheckOut, int numberOfPeople, Type type) {
-        List<Room> allRooms = roomRepository.findByCapacityGreaterThanEqualAndType(numberOfPeople, type);
+    public List<Room> findAvailableRooms(LocalDate dataCheckIn, LocalDate dataCheckOut, int numberOfPeople) {
+        List<Room> allRooms = roomRepository.findByCapacityGreaterThanEqual(numberOfPeople);
         System.out.println("camere" + allRooms);
         return allRooms.stream()
                 .filter(room -> reservationRepository

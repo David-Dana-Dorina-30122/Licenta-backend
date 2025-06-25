@@ -1,9 +1,9 @@
 package project.review;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import project.reservations.Reservation;
-
 import java.time.LocalDateTime;
 
 @Data
@@ -22,6 +22,7 @@ public class Review {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "reservation_id", nullable = false)
+    @JsonIgnore
     private Reservation reservation;
 
 }

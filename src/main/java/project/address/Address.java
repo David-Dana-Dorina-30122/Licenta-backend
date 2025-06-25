@@ -5,7 +5,6 @@ import jakarta.persistence.*;
 import lombok.Data;
 import project.user.User;
 
-
 @Data
 @Entity
 public class Address {

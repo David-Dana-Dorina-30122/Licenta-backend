@@ -7,7 +7,5 @@ import java.util.List;
 
 @Repository
 public interface RoomRepository extends JpaRepository<Room, Integer> {
-
     List<Room> findByCapacityGreaterThanEqual(int capacity);
-    List<Room> findByCapacityGreaterThanEqualAndType(int capacity, Type type);
 }

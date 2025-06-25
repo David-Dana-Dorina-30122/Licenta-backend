@@ -4,22 +4,22 @@ import com.google.zxing.BarcodeFormat;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
-import io.jsonwebtoken.impl.security.EdwardsCurve;
+import jakarta.mail.MessagingException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import project.dto.ExternalReservationDTO;
 import project.dto.ReservationDTO;
-import project.room.Availability;
 import project.room.Room;
 import project.room.RoomRepository;
+import project.security.EmailService;
 import project.user.User;
 import project.user.UserRepository;
+import project.user.UserService;
 
 import java.io.ByteArrayOutputStream;
-import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -31,19 +31,21 @@ import java.util.UUID;
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
-
     private final UserRepository userRepository;
-
     private final RoomRepository roomRepository;
+    private final EmailService emailService;
+    private final UserService userService;
 
-    public ReservationService(ReservationRepository reservationRepository, UserRepository userRepository, RoomRepository roomRepository) {
+    public ReservationService(ReservationRepository reservationRepository, UserRepository userRepository, RoomRepository roomRepository, EmailService emailService, UserService userService) {
         this.reservationRepository = reservationRepository;
         this.userRepository = userRepository;
         this.roomRepository = roomRepository;
+        this.emailService = emailService;
+        this.userService = userService;
     }
 
 
-    public Reservation createReservationForUser(ReservationDTO dto, String username) {
+    public Reservation createReservationForUser(ReservationDTO dto, String username) throws MessagingException {
         User user = userRepository.findByEmail(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -70,16 +72,18 @@ public class ReservationService {
         reservation.setStatus(ReservationStatus.ACTIVE);
         reservation.setCheckedInToken(UUID.randomUUID().toString());
 
-        room.setStatus(Availability.UNAVAILABLE);
+//        room.setStatus(Availability.UNAVAILABLE);
         room = roomRepository.save(room);
         reservation.setRoom(room);
+
+        String subject = "Rezervare";
+        String message = "Rezervarea dumneavoastră a fost procesată";
+
+        emailService.sendVerificationEmail(user.getEmail(),subject,message);
 
         return reservationRepository.save(reservation);
     }
 
-    public List<Reservation> findConflictingReservations(int roomId, Date startDate, Date endDate) {
-        return reservationRepository.findByRoomIdAndDataCheckInBetweenOrDataCheckOutBetween(roomId, startDate, endDate, startDate, endDate);
-    }
 
     public List<Reservation> getReservationsForUsername(String username) {
         User user = userRepository.findByEmail(username)
@@ -88,22 +92,33 @@ public class ReservationService {
         return reservationRepository.findByUser(user);
     }
 
-//    public Reservation read(int idNumber) {
-//        return reservationRepository.findById(idNumber).orElseThrow(() -> new RuntimeException("Reservation not found"));
-//    }
-//
     public List<Reservation> findAll() {
         return reservationRepository.findAll();
     }
 
     public Reservation update(int id, Reservation newReservation) {
-        Reservation existingReservation = reservationRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Reservation not found with id: " + id));
+            Reservation existingReservation = reservationRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Reservation not found with id: " + id));
 
-        existingReservation.setDataCheckIn(newReservation.getDataCheckIn());
-        existingReservation.setDataCheckOut(newReservation.getDataCheckOut());
-        existingReservation.setStatus(newReservation.getStatus());
-        existingReservation.setTotalCost(newReservation.getTotalCost());
+            if(newReservation.getDataCheckIn() != null){
+                existingReservation.setDataCheckIn(newReservation.getDataCheckIn());
+            }
+            if(newReservation.getDataCheckOut() != null){
+                existingReservation.setDataCheckOut(newReservation.getDataCheckOut());
+            }
+        if (newReservation.getCheckedInAt() != null) {
+            existingReservation.setCheckedInAt(newReservation.getCheckedInAt());
+        }
+        if (newReservation.getCheckedOutAt() != null) {
+            existingReservation.setCheckedOutAt(newReservation.getCheckedOutAt());
+        }
+
+        if(newReservation.getStatus() != null){
+            existingReservation.setStatus(newReservation.getStatus());
+            }
+             if(newReservation.getTotalCost() != null){
+                existingReservation.setTotalCost(newReservation.getTotalCost());
+            }
 
         return reservationRepository.save(existingReservation);
     }
@@ -115,7 +130,6 @@ public class ReservationService {
 
         System.out.println("Deleting reservation: " + existingReservation);
 
-        // IMPORTANT: Elimină manual din relațiile bidirecționale
         if (existingReservation.getUser() != null) {
             existingReservation.getUser().getReservations().remove(existingReservation);
         }
@@ -125,8 +139,37 @@ public class ReservationService {
         }
 
         reservationRepository.delete(existingReservation);
-        reservationRepository.flush(); // forțează delete
+        reservationRepository.flush();
     }
+
+    public void createExternalReservation(ExternalReservationDTO dto) {
+        Reservation reservation = new Reservation();
+        reservation.setDataCheckIn(dto.getCheckIn());
+        reservation.setDataCheckOut(dto.getCheckOut());
+        reservation.setNumberOfAdults(dto.getAdults());
+        reservation.setNumberOfChildren(dto.getChildren());
+        reservation.setNumberOfPeople(dto.getAdults() + dto.getChildren());
+        reservation.setStatus(ReservationStatus.ACTIVE);
+
+        Room room = roomRepository.findById(dto.getRoomId())
+                .orElseThrow(() -> new RuntimeException("Room not found"));
+        reservation.setRoom(room);
+
+        User externalUser = userService.findOrCreateExternalUser(dto.getGuestEmail());
+        reservation.setUser(externalUser);
+
+        reservationRepository.save(reservation);
+
+        try {
+            String checkInUrl = "http://172.20.10.1/reservations/checkin/" + reservation.getCheckedInToken();
+            byte[] qrImage = generateQRCodeImage(checkInUrl, 300, 300);
+
+            emailService.sendQRCodeEmail(reservation.getUser().getEmail(), qrImage);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 
 
     public byte[] generateQRCodeImage(String text, int width, int height) throws Exception {
@@ -138,13 +181,11 @@ public class ReservationService {
         return pngOutputStream.toByteArray();
     }
 
-    @Scheduled(fixedRate = 6000)
+    @Scheduled(fixedRate = 360000)
     @Transactional
     public void markReservationsAsInactive() {
         Date today = new Date();
-
         List<Reservation> activeReservations = reservationRepository.findByStatus(ReservationStatus.ACTIVE);
-
         for (Reservation res : activeReservations) {
             if (res.getDataCheckOut().before(today)) {
                 res.setStatus(ReservationStatus.COMPLETED);

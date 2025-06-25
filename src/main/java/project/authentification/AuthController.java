@@ -4,6 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import project.dto.LoginUserDto;
+import project.dto.RegisterUserDto;
 import project.dto.ResetPasswordDto;
 import project.dto.VerifyUserDto;
 import project.responses.LoginResponse;
@@ -26,7 +27,7 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<User> register(@RequestBody LoginUserDto registerUserDto) {
+    public ResponseEntity<User> register(@RequestBody RegisterUserDto registerUserDto) {
         User registeredUser = authenticationService.signup(registerUserDto);
         return ResponseEntity.ok(registeredUser);
     }

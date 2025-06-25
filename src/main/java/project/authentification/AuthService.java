@@ -1,17 +1,10 @@
 package project.authentification;
 
-
 import jakarta.mail.MessagingException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import project.dto.LoginUserDto;
@@ -20,10 +13,8 @@ import project.dto.ResetPasswordDto;
 import project.dto.VerifyUserDto;
 import project.security.EmailService;
 import project.security.JwtService;
-import project.user.CustomUserDetails;
 import project.user.User;
 import project.user.UserRepository;
-
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Random;
@@ -32,12 +23,9 @@ import java.util.UUID;
 @Service
 public class AuthService {
 
-
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final AuthenticationManager authenticationManager;
     private final EmailService emailService;
-    private final UserDetailsService userDetailsService;
     private final JwtService jwtService;
 
     public AuthService(
@@ -48,16 +36,14 @@ public class AuthService {
             UserDetailsService userDetailsService,
             JwtService jwtService
     ) {
-        this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
-        this.userDetailsService = userDetailsService;
         this.jwtService = jwtService;
     }
 
-    public User signup(LoginUserDto input) {
-        User user = new User(input.getEmail(), passwordEncoder.encode(input.getPassword()));
+    public User signup(RegisterUserDto input) {
+        User user = new User(input.getEmail(), passwordEncoder.encode(input.getPassword()), input.getFirstName(), input.getLastName(), input.getPhone());
         user.setVerificationCode(generateVerificationCode());
         user.setVerificationCodeExpiresAt(LocalDateTime.now().plusMinutes(15));
         user.setEnabled(false);
@@ -72,8 +58,6 @@ public class AuthService {
         if (!passwordEncoder.matches(loginUserDto.getPassword(), user.getPassword())) {
             throw new BadCredentialsException("Invalid credentials");
         }
-
-        // Dacă nu e activat, tot îl lăsăm să intre, dar frontendul va decide ce face
         return jwtService.generateToken(user);
     }
 
@@ -107,15 +91,14 @@ public class AuthService {
             }
             user.setVerificationCode(generateVerificationCode());
             user.setVerificationCodeExpiresAt(LocalDateTime.now().plusHours(1));
-            sendVerificationEmail(user); // <-- se trimite emailul
+            sendVerificationEmail(user);
             userRepository.save(user);
         } else {
             throw new RuntimeException("User not found");
         }
     }
 
-
-    private void sendVerificationEmail(User user) { //TODO: Update with company logo
+    private void sendVerificationEmail(User user) {
         String subject = "Account Verification";
         String verificationCode = "VERIFICATION CODE " + user.getVerificationCode();
         String htmlMessage = "<html>"
@@ -134,7 +117,6 @@ public class AuthService {
         try {
             emailService.sendVerificationEmail(user.getEmail(), subject, htmlMessage);
         } catch (MessagingException e) {
-            // Handle email sending exception
             e.printStackTrace();
         }
     }

@@ -32,15 +32,23 @@ public class SecurityConfig{
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers(
+                                "/v3/api-docs/**",
+                                "/v3/api-docs.yaml",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/swagger-resources/**",
+                                "/webjars/**"
+                        ).permitAll()
                         .requestMatchers("/rooms/create").hasRole("ADMIN")
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/reservations/**").authenticated()
                         .requestMatchers("/rooms/**").permitAll()
-                        .requestMatchers("/users/**").permitAll()
+                        .requestMatchers("/users/**").authenticated()
                         .requestMatchers("/addresses/**").authenticated()
-                        .requestMatchers("/reviews/**").permitAll()
-
-
+                        .requestMatchers("/reviews/**").authenticated()
+                        .requestMatchers("/external/**").permitAll()
+                        .requestMatchers("/restaurants/**").permitAll()
                 )
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint((request, response, authException) -> {
@@ -58,16 +66,4 @@ public class SecurityConfig{
 
         return http.build();
     }
-//    @Bean
-//    public CorsConfigurationSource corsConfigurationSource() {
-//        CorsConfiguration configuration = new CorsConfiguration();
-//        configuration.setAllowedOrigins(List.of("https://app-backend.com", "http://localhost:8080")); //TODO: update backend url
-//        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
-//        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
-//
-//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-//        source.registerCorsConfiguration("/**", configuration);
-//        return source;
-//    }
-
 }

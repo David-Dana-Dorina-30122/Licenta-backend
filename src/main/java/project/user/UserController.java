@@ -1,17 +1,11 @@
 package project.user;
 
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-import project.address.Address;
 import project.dto.UserDto;
 import project.security.JwtService;
-
 import java.util.List;
 
 @RestController
@@ -19,17 +13,14 @@ import java.util.List;
 @CrossOrigin(origins = "http://localhost:4200")
 public class UserController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
     private final JwtService jwtService;
-    @Autowired
-    private UserRepository userRepository;
 
-    public UserController(JwtService jwtService) {
+    public UserController(JwtService jwtService, UserService userService) {
         this.jwtService = jwtService;
+        this.userService = userService;
     }
-
 
     @GetMapping("/role")
     public String getUserRole(@RequestHeader("Authorization") String authHeader) {
@@ -38,11 +29,6 @@ public class UserController {
         return "Rolul utilizatorului este: " + role;
     }
 
-//    @PostMapping
-//    public User create(@RequestBody User user) {
-//        return userService.create(user);
-//    }
-
     @GetMapping("/me")
     public ResponseEntity<UserDto> authenticatedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -50,17 +36,11 @@ public class UserController {
         return ResponseEntity.ok(UserDto.fromUser(currentUser));
     }
 
-
     @GetMapping("/")
     public ResponseEntity<List<User>> allUsers() {
         List <User> users = userService.allUsers();
         return ResponseEntity.ok(users);
     }
-
-//    @GetMapping
-//    public List<User> getAllUsers (){
-//        return userService.allUsers();
-//    }
 
     @GetMapping("/{id}")
     public User read(@PathVariable int id){

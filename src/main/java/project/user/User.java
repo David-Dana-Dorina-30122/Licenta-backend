@@ -51,9 +51,9 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private Role role = Role.ROLE_USER;
 
-    @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @ToString.Exclude
+    @JsonIgnore
     private List<Reservation> reservations = new ArrayList<>();
 
     @Column(name = "verification_code")
@@ -69,7 +69,16 @@ public class User implements UserDetails {
     public User(String email, String password) {
         this.email = email;
         this.password = password;
-       // this.enabled = false; // implicit user nevalidat la creare
+       // this.enabled = false;
+    }
+
+    public User(String email, String password, String firstName, String lastName, String phone) {
+        this.email = email;
+        this.password = password;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.phone = phone;
+        // this.enabled = false;
     }
 
     public boolean getEnabled() {

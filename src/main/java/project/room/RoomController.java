@@ -2,40 +2,25 @@ package project.room;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 import project.dto.RoomDTO;
 import project.mappings.RoomMapper;
 import project.reservations.Reservation;
 import project.reservations.ReservationRepository;
-import project.reservations.ReservationService;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/rooms")
-
 public class RoomController {
 
     private final RoomService roomService;
-    private final RoomRepository roomRepository;
     private final ReservationRepository reservationRepository;
 
     @Autowired
-    public RoomController(RoomService roomService, RoomRepository roomRepository, ReservationRepository reservationRepository) {
-        this.roomRepository = roomRepository;
+    public RoomController(RoomService roomService, ReservationRepository reservationRepository) {
         this.roomService = roomService;
         this.reservationRepository = reservationRepository;
     }
@@ -49,10 +34,9 @@ public class RoomController {
     public ResponseEntity<List<Room>> getAvailableRooms(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate checkIn,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate checkOut,
-            @RequestParam int numberOfPeople,
-            @RequestParam Type type) {
+            @RequestParam int numberOfPeople) {
 
-        List<Room> availableRooms = roomService.findAvailableRooms(checkIn, checkOut, numberOfPeople,type);
+        List<Room> availableRooms = roomService.findAvailableRooms(checkIn, checkOut, numberOfPeople);
         return ResponseEntity.ok(availableRooms);
     }
 
@@ -61,8 +45,6 @@ public class RoomController {
         Room updatedRoom = roomService.addImageUrls(id, imageUrls);
         return ResponseEntity.ok(updatedRoom);
     }
-
-
 
     @GetMapping
     public List<Room> getAllRooms() {

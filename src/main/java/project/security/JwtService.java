@@ -1,20 +1,17 @@
 package project.security;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import java.security.Key;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.security.core.GrantedAuthority;
 import project.user.User;
 import project.user.UserRepository;
-
-
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -46,14 +43,11 @@ public class JwtService {
     public String extractRole(String token) {
         return extractClaim(token, claims -> claims.get("role", String.class));
     }
-
-
     public String generateToken(User userDetails) {
         return generateToken(new HashMap<>(), userDetails);
     }
 
     public String generateToken(Map<String, Object> extraClaims, User userDetails) {
-
         String role = userDetails.getAuthorities().stream()
                 .findFirst()
                 .map(GrantedAuthority::getAuthority)

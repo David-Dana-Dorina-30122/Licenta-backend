@@ -13,8 +13,11 @@ import java.util.List;
 @Slf4j
 public class PaymentService {
 
-    @Autowired
-    private PaymentRepository paymentRepository;
+    private final PaymentRepository paymentRepository;
+
+    public PaymentService(PaymentRepository paymentRepository) {
+        this.paymentRepository = paymentRepository;
+    }
 
 
     public List<Payment> getAllPayments() {

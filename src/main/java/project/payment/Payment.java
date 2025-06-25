@@ -3,7 +3,6 @@ package project.payment;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
-import project.reservations.Reservation;
 import java.time.LocalDateTime;
 
 @Entity

@@ -1,6 +1,5 @@
 package project.review;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -9,11 +8,12 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import project.dto.ReviewDTO;
+import project.dto.RoomDTO;
+import project.mappings.RoomMapper;
 import project.reservations.Reservation;
 import project.reservations.ReservationRepository;
 import project.user.User;
 import project.user.UserRepository;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -48,6 +48,24 @@ public class ReviewController {
         return ResponseEntity.ok(savedReview);
     }
 
+    @GetMapping("/my-rooms")
+    public ResponseEntity<List<RoomDTO>> getMyRooms(@AuthenticationPrincipal UserDetails userDetails) {
+        User user = userRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        List<Reservation> reservations = reservationRepository.findByUser(user);
+
+        List<RoomDTO> roomDTOs = reservations.stream()
+                .map(Reservation::getRoom)
+                .distinct()
+                .map(RoomMapper::toDto)
+                .toList();
+
+        return ResponseEntity.ok(roomDTOs);
+    }
+
+
+
     @GetMapping("/{reservationId}")
     public ResponseEntity<List<Review>> getReviews(@PathVariable int reservationId) {
         return ResponseEntity.ok(reviewService.getReviewsByReservationId(reservationId));
@@ -56,7 +74,6 @@ public class ReviewController {
 
     @PostMapping
     public ResponseEntity<?> addReview(@RequestBody ReviewDTO dto, @AuthenticationPrincipal UserDetails userDetails) {
-        // Autentificare și validare utilizator
         User user = userRepository.findByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 

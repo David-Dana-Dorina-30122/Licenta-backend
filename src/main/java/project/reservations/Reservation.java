@@ -1,6 +1,5 @@
 package project.reservations;
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -10,8 +9,6 @@ import project.payment.Payment;
 import project.review.Review;
 import project.room.Room;
 import project.user.User;
-
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
@@ -52,6 +49,8 @@ public class Reservation {
     private String checkedInToken;
     @Column
     private LocalDateTime checkedInAt;
+    @Column
+    private LocalDateTime checkedOutAt;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")
