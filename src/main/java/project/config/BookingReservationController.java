@@ -18,19 +18,15 @@ public class BookingReservationController {
     private String secretApiKey;
 
     private final ReservationService reservationService;
-
     @PostMapping("/reservation")
     public ResponseEntity<?> receiveReservation(
             @RequestBody ExternalReservationDTO dto,
             @RequestHeader("X-API-KEY") String apiKey
     ) {
-
         if (!apiKey.equals(secretApiKey)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-
         reservationService.createExternalReservation(dto);
-
         return ResponseEntity.ok("Reservation received");
     }
 }
