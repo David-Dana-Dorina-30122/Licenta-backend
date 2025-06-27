@@ -80,7 +80,7 @@ public class ReservationController {
     public ResponseEntity<byte[]> getReservationQRCode(@PathVariable int id) throws Exception {
         Reservation res = reservationRepository.findById(id).orElseThrow();
         String token = res.getCheckedInToken();
-        String checkInUrl = "http://172.20.10.1/reservations/checkin/" + token;
+        String checkInUrl = "https://licenta-backend-production-d411.up.railway.app/reservations/check-in/" + token;
 
         System.out.println("token: " + token);
 
