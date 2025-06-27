@@ -63,7 +63,7 @@ public class Reservation {
    // @JsonBackReference
     private Room room;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @OneToOne
     @JoinColumn(name = "payment_id")
     private Payment payment;
 

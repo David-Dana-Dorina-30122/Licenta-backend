@@ -44,6 +44,10 @@ public class ReservationService {
         this.userService = userService;
     }
 
+    public Reservation save(Reservation reservation) {
+        return reservationRepository.save(reservation);
+    }
+
 
     public Reservation createReservationForUser(ReservationDTO dto, String username) throws MessagingException {
         User user = userRepository.findByEmail(username)
@@ -94,6 +98,10 @@ public class ReservationService {
 
     public List<Reservation> findAll() {
         return reservationRepository.findAll();
+    }
+
+    public Reservation getById(int id){
+        return reservationRepository.findById(id).orElse(null);
     }
 
     public Reservation update(int id, Reservation newReservation) {

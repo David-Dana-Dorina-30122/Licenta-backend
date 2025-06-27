@@ -49,6 +49,7 @@ public class SecurityConfig{
                         .requestMatchers("/reviews/**").authenticated()
                         .requestMatchers("/external/**").permitAll()
                         .requestMatchers("/restaurants/**").permitAll()
+                        .requestMatchers("/payments/**").authenticated()
                 )
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint((request, response, authException) -> {

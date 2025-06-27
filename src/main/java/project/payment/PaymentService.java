@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import project.reservations.Reservation;
 import project.reservations.ReservationRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -38,6 +39,17 @@ public class PaymentService {
             throw new EntityNotFoundException("Payment not found with id: " + id);
         }
         paymentRepository.deleteById(id);
+    }
+
+    public Payment processPayment(Reservation reservation, String method) {
+        Payment payment = new Payment();
+        payment.setMethod(method);
+        payment.setReservation(reservation);
+        payment.setPaymentDate(LocalDateTime.now());
+
+        payment.setStatus("COMPLETED");
+
+        return paymentRepository.save(payment);
     }
 }
 

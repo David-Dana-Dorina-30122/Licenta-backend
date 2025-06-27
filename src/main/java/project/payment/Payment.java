@@ -3,6 +3,8 @@ package project.payment;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
+import project.reservations.Reservation;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -10,18 +12,15 @@ import java.time.LocalDateTime;
 public class Payment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
 
-    @Column(nullable = false)
-    private Double amount;
-
-    @CreationTimestamp
-    @Column(updatable = false, nullable = false)
+    private String method; // ex: CARD, CASH, FAKE
+    private String status; // PENDING, COMPLETED, FAILED
     private LocalDateTime paymentDate;
 
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private PaymentMethod paymentMethod;
+    @OneToOne(mappedBy = "payment")
+    private Reservation reservation;
 
 }
+
 
