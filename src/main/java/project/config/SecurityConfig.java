@@ -42,6 +42,7 @@ public class SecurityConfig{
                         ).permitAll()
                         .requestMatchers("/rooms/create").hasRole("ADMIN")
                         .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/reservations/check-in/**").permitAll()
                         .requestMatchers("/reservations/**").authenticated()
                         .requestMatchers("/rooms/**").permitAll()
                         .requestMatchers("/users/**").authenticated()
