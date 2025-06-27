@@ -103,7 +103,14 @@ public class ReservationController {
         res.setCheckedInAt(LocalDateTime.now());
         reservationRepository.save(res);
 
-        return ResponseEntity.ok("Check-in reușit pentru rezervarea #" + res.getId());
+        String html = "<html><body>"
+                + "<h1>Confirmă check-in pentru rezervarea #" + res.getId() + "</h1>"
+                + "<form method='POST' action='/reservations/check-in'>"
+                + "<input type='hidden' name='token' value='" + token + "'/>"
+                + "<button type='submit'>Confirmă check-in</button>"
+                + "</form></body></html>";
+
+        return ResponseEntity.ok().contentType(MediaType.TEXT_HTML).body(html);
     }
 
 

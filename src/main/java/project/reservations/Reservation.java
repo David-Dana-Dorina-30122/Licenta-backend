@@ -1,5 +1,6 @@
 package project.reservations;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -55,6 +56,7 @@ public class Reservation {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")
     @ToString.Exclude
+    @JsonBackReference
     private User user;
 
     @ManyToOne(fetch = FetchType.EAGER)
