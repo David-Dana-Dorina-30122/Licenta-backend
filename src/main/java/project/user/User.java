@@ -54,8 +54,8 @@ public class User implements UserDetails {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @ToString.Exclude
-//    @JsonIgnore
-    @JsonManagedReference
+    @JsonIgnore
+//    @JsonManagedReference
     private List<Reservation> reservations = new ArrayList<>();
 
     @Column(name = "verification_code")
