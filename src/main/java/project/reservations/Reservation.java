@@ -64,7 +64,7 @@ public class Reservation {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "room_id")
     @ToString.Exclude
-    @JsonIgnore
+//    @JsonIgnore
    // @JsonBackReference
     private Room room;
 
