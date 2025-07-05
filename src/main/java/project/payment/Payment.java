@@ -2,6 +2,7 @@ package project.payment;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import project.reservations.Reservation;
 
@@ -18,8 +19,9 @@ public class Payment {
     private String status; // PENDING, COMPLETED, FAILED
     private LocalDateTime paymentDate;
 
-    @OneToOne(mappedBy = "payment")
+    @OneToOne
     private Reservation reservation;
+
 
 }
 

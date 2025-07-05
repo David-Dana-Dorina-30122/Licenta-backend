@@ -195,7 +195,7 @@ public class ReservationService {
         Date today = new Date();
         List<Reservation> activeReservations = reservationRepository.findByStatus(ReservationStatus.ACTIVE);
         for (Reservation res : activeReservations) {
-            if (res.getDataCheckOut().before(today)) {
+            if (res.getDataCheckOut().before(today) || res.getCheckedOutAt()!=null) {
                 res.setStatus(ReservationStatus.COMPLETED);
                 reservationRepository.save(res);
             }

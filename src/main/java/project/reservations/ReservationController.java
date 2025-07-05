@@ -113,5 +113,21 @@ public class ReservationController {
         return ResponseEntity.ok().contentType(MediaType.TEXT_HTML).body(html);
     }
 
+    @PostMapping("/check-in")
+    public ResponseEntity<String> confirmCheckIn(@RequestParam String token) {
+        Reservation res = reservationRepository.findByCheckedInToken(token)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Token invalid"));
+
+        if (res.getCheckedInAt() != null) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Check-in deja efectuat!");
+        }
+
+        res.setCheckedInAt(LocalDateTime.now());
+        reservationRepository.save(res);
+
+
+        return ResponseEntity.ok("Check-in efectuat cu succes!");
+    }
+
 
 }

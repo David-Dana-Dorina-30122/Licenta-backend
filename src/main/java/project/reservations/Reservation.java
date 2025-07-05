@@ -3,10 +3,12 @@ package project.reservations;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jdk.jfr.Timestamp;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.hibernate.annotations.CreationTimestamp;
 import project.payment.Payment;
 import project.review.Review;
 import project.room.Room;
@@ -53,11 +55,14 @@ public class Reservation {
     private LocalDateTime checkedInAt;
     @Column
     private LocalDateTime checkedOutAt;
+    @Column
+    @CreationTimestamp
+    private LocalDateTime createdAt;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")
     @ToString.Exclude
-    @JsonIgnore
+//    @JsonIgnore
 //    @JsonBackReference
     private User user;
 
@@ -68,7 +73,7 @@ public class Reservation {
    // @JsonBackReference
     private Room room;
 
-    @OneToOne
+    @OneToOne(mappedBy = "reservation", cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "payment_id")
     @JsonIgnore
     private Payment payment;

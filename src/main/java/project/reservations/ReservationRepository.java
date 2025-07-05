@@ -15,7 +15,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Intege
 
 
     @Query("SELECT r FROM Reservation r WHERE r.room.id = :roomId " +
-            "AND ((r.dataCheckIn <= :checkOut AND r.dataCheckOut >= :checkIn))")
+            "AND ((DATE(r.dataCheckIn) <= :checkOut AND DATE(r.dataCheckOut) >= :checkIn))")
     List<Reservation> findConflictingReservations(@Param("roomId") int roomId,
                                                   @Param("checkIn") Date checkIn,
                                                   @Param("checkOut") Date checkOut);
