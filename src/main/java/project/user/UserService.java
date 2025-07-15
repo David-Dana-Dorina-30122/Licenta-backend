@@ -7,9 +7,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
-import project.reservations.ReservationRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -19,14 +17,11 @@ public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final PlatformTransactionManager transactionManager;
-    private final ReservationRepository reservationRepository;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, PlatformTransactionManager transactionManager, ReservationRepository reservationRepository) {
+    public UserService(UserRepository userRepository,
+                       PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.transactionManager = transactionManager;
-        this.reservationRepository = reservationRepository;
     }
 
     public User create(User user) {
@@ -34,7 +29,7 @@ public class UserService implements UserDetailsService {
     }
 
     public User read(int id) {
-      return userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+      return userRepository.findById(id).orElseThrow(() -> new RuntimeException("Utilizatorul nu a fost găsit:" + id));
     }
 
     public List<User> allUsers(){
@@ -43,7 +38,7 @@ public class UserService implements UserDetailsService {
 
     public User update(int id, User updatedUser) {
         User existingUser = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found with id " + id));
+                .orElseThrow(() -> new RuntimeException("Utilizatorul nu a fost găsit:" + id));
 
         existingUser.setFirstName(updatedUser.getFirstName());
         existingUser.setLastName(updatedUser.getLastName());
@@ -51,36 +46,33 @@ public class UserService implements UserDetailsService {
             existingUser.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
         }
         existingUser.setPhone(updatedUser.getPhone());
-       // existingUser.setAddress(updatedUser.getAddress());
-
-//        if (updatedUser.getAddresses() != null && !updatedUser.getAddresses().isEmpty()) {
-//            existingUser.setAddresses(updatedUser.getAddresses());
-//        }
-
-//        if (updatedUser.getRole() != null) {
-//            existingUser.setRole(updatedUser.getRole());
-//        }
-
         return userRepository.save(existingUser);
     }
 
     public User updateRole(int id, Role updatedRole) {
         User existingUser = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found with id " + id));
+                .orElseThrow(() -> new RuntimeException("Utilizatorul nu a fost găsit:" + id));
         existingUser.setRole(updatedRole);
 
         return userRepository.save(existingUser);
     }
 
     public void delete(int id) {
-        User existingUser = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found with id:" + id));
+        User existingUser = userRepository.findById(id).orElseThrow(() -> new RuntimeException("Utilizatorul nu a fost găsit:" + id));
+
+        existingUser.getReservations().forEach(reservation -> reservation.setUser(null));
+        existingUser.getReservations().clear();
+
+        existingUser.getAddresses().forEach(address -> address.setUser(null));
+        existingUser.getAddresses().clear();
+
         userRepository.deleteById(existingUser.getId());
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findByEmail(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Utilizatorul nu a fost găsit"));
 
         return new CustomUserDetails(user);
     }

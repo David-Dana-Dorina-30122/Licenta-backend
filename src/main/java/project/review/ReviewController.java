@@ -48,10 +48,15 @@ public class ReviewController {
         return ResponseEntity.ok(savedReview);
     }
 
+    @GetMapping("/getAll")
+    public ResponseEntity<List<ReviewDTO>> getAllReviews() {
+        return ResponseEntity.ok(reviewService.getAllReviews());
+    }
+
     @GetMapping("/my-rooms")
     public ResponseEntity<List<RoomDTO>> getMyRooms(@AuthenticationPrincipal UserDetails userDetails) {
         User user = userRepository.findByEmail(userDetails.getUsername())
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+                .orElseThrow(() -> new UsernameNotFoundException("Utilizatorul nu a fost găsit"));
 
         List<Reservation> reservations = reservationRepository.findByUser(user);
 
@@ -65,7 +70,6 @@ public class ReviewController {
     }
 
 
-
     @GetMapping("/{reservationId}")
     public ResponseEntity<List<Review>> getReviews(@PathVariable int reservationId) {
         return ResponseEntity.ok(reviewService.getReviewsByReservationId(reservationId));
@@ -75,13 +79,13 @@ public class ReviewController {
     @PostMapping
     public ResponseEntity<?> addReview(@RequestBody ReviewDTO dto, @AuthenticationPrincipal UserDetails userDetails) {
         User user = userRepository.findByEmail(userDetails.getUsername())
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+                .orElseThrow(() -> new UsernameNotFoundException("Utilizatorul nu a fost găsit"));
 
         Reservation reservation = reservationRepository.findById(dto.getReservationId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Reservation not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Rezervarea nu a fost găsită"));
 
         if (reservation.getUser().getId() != user.getId()) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Rezervarea nu îți aparține.");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Rezervare greșită");
         }
 
 

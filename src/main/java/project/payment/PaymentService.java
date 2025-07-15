@@ -2,11 +2,8 @@ package project.payment;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import project.reservations.Reservation;
-import project.reservations.ReservationRepository;
-
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -27,7 +24,7 @@ public class PaymentService {
 
     public Payment getPaymentById(int id) {
         return paymentRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Payment not found with id: " + id));
+                .orElseThrow(() -> new EntityNotFoundException("Plata nu a fost găsită: " + id));
     }
 
     public Payment createPayment(Payment payment) {
@@ -36,20 +33,9 @@ public class PaymentService {
 
     public void deletePayment(int id) {
         if (!paymentRepository.existsById(id)) {
-            throw new EntityNotFoundException("Payment not found with id: " + id);
+            throw new EntityNotFoundException("Plata nu a fost găsită: " + id);
         }
         paymentRepository.deleteById(id);
-    }
-
-    public Payment processPayment(Reservation reservation, String method) {
-        Payment payment = new Payment();
-        payment.setMethod(method);
-        payment.setReservation(reservation);
-        payment.setPaymentDate(LocalDateTime.now());
-
-        payment.setStatus("COMPLETED");
-
-        return paymentRepository.save(payment);
     }
 }
 

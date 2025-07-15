@@ -1,8 +1,6 @@
 package project.restaurant;
 
 import org.springframework.stereotype.Service;
-import project.reservations.Reservation;
-
 import java.util.List;
 
 @Service
@@ -19,7 +17,7 @@ public class RestaurantService {
     }
 
     public Restaurant getFoodById(int id) {
-        return restaurantRepository.findById(id).orElseThrow(() -> new RuntimeException("Food not found" + id));
+        return restaurantRepository.findById(id).orElseThrow(() -> new RuntimeException("Itemul nu a fost găsit" + id));
     }
 
     public Restaurant getFoodByName(String name) {
@@ -32,7 +30,7 @@ public class RestaurantService {
 
     public void updateFood(int id, Restaurant food) {
         Restaurant existingFood = restaurantRepository.getFoodById(id)
-                .orElseThrow(() -> new RuntimeException("Reservation not found with id: " + id));
+                .orElseThrow(() -> new RuntimeException("Itemul nu a fost găsit: " + id));
 
         if (food.getFoodName() != null) {
             existingFood.setFoodName(food.getFoodName());

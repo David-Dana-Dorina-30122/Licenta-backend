@@ -63,11 +63,6 @@ public class RoomController {
     }
 
 
-//    @PostMapping
-//    public Room createRoom(@RequestBody Room room) {
-//        return roomService.createRoom(room);
-//    }
-
     @PutMapping("/{id}")
     public Room updateRoom(@PathVariable int id, @RequestBody Room room) {
         return roomService.updateRoom(id, room);

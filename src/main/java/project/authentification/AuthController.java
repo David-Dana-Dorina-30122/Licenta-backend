@@ -1,14 +1,11 @@
 package project.authentification;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import project.dto.LoginUserDto;
 import project.dto.RegisterUserDto;
 import project.dto.ResetPasswordDto;
 import project.dto.VerifyUserDto;
-import project.responses.LoginResponse;
-import project.security.JwtService;
 import project.user.User;
 
 
@@ -17,12 +14,11 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
-@CrossOrigin(origins = "http://localhost:4200")
 public class AuthController {
 
     private final AuthService authenticationService;
 
-    public AuthController(JwtService jwtService, AuthService authenticationService) {
+    public AuthController(AuthService authenticationService) {
         this.authenticationService = authenticationService;
     }
 
@@ -32,17 +28,9 @@ public class AuthController {
         return ResponseEntity.ok(registeredUser);
     }
 
-//    @PostMapping("/login")
-//    public ResponseEntity<LoginResponse> authenticate(@RequestBody LoginUserDto loginUserDto){
-//        User authenticatedUser = authenticationService.authenticate(loginUserDto);
-//        String jwtToken = jwtService.generateToken(authenticatedUser);
-//        LoginResponse loginResponse = new LoginResponse(jwtToken, jwtService.getExpirationTime());
-//        return ResponseEntity.ok(loginResponse);
-//    }
-
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginUserDto input) {
-        String token = authenticationService.authenticate(input); // schimbă tipul returnat în String
+        String token = authenticationService.authenticate(input);
         return ResponseEntity.ok(Map.of("token", token));
     }
 
@@ -51,7 +39,7 @@ public class AuthController {
         try {
             authenticationService.verifyUser(verifyUserDto);
             Map<String, String> response = new HashMap<>();
-            response.put("message", "Account verified successfully");
+            response.put("message", "Cont verificat cu succes");
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             Map<String, String> error = new HashMap<>();
@@ -65,12 +53,12 @@ public class AuthController {
         String email = request.get("email");
         System.out.println("Email primit pentru retrimitere: " + email);
         if (email == null || email.isEmpty()) {
-            return ResponseEntity.badRequest().body("Email is required");
+            return ResponseEntity.badRequest().body("Emailul este necesar");
         }
 
         try {
             authenticationService.resendVerificationCode(email);
-            return ResponseEntity.ok("Verification code sent");
+            return ResponseEntity.ok("Cod de verificare trimis");
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -81,7 +69,7 @@ public class AuthController {
         String email = request.get("email");
         try {
             authenticationService.sendPasswordResetEmail(email);
-            return ResponseEntity.ok(Map.of("message", "Password reset link sent."));
+            return ResponseEntity.ok(Map.of("message", "Link pentru parolă trimis."));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
@@ -92,12 +80,9 @@ public class AuthController {
     public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordDto resetDto) {
         try {
             authenticationService.resetPassword(resetDto);
-            return ResponseEntity.ok(Map.of("message", "Password successfully reset."));
+            return ResponseEntity.ok(Map.of("message", "Parolă schimbată cu succes."));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
-
-
-
 }

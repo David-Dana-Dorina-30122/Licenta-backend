@@ -1,9 +1,7 @@
 package project.authentification;
 
 import jakarta.mail.MessagingException;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -30,10 +28,8 @@ public class AuthService {
 
     public AuthService(
             UserRepository userRepository,
-            AuthenticationManager authenticationManager,
             PasswordEncoder passwordEncoder,
             EmailService emailService,
-            UserDetailsService userDetailsService,
             JwtService jwtService
     ) {
         this.userRepository = userRepository;
@@ -53,10 +49,10 @@ public class AuthService {
 
     public String authenticate(LoginUserDto loginUserDto) {
         User user = userRepository.findByEmail(loginUserDto.getEmail())
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+                .orElseThrow(() -> new UsernameNotFoundException("Utilizatorul nu a fost găsit"));
 
         if (!passwordEncoder.matches(loginUserDto.getPassword(), user.getPassword())) {
-            throw new BadCredentialsException("Invalid credentials");
+            throw new BadCredentialsException("Credentiale invalide");
         }
         return jwtService.generateToken(user);
     }
@@ -66,7 +62,7 @@ public class AuthService {
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
             if (user.getVerificationCodeExpiresAt().isBefore(LocalDateTime.now())) {
-                throw new RuntimeException("Verification code has expired");
+                throw new RuntimeException("Cod de verificare expirat");
             }
             if (user.getVerificationCode().equals(input.getVerificationCode())) {
                 user.setEnabled(true);
@@ -74,10 +70,10 @@ public class AuthService {
                 user.setVerificationCodeExpiresAt(null);
                 userRepository.save(user);
             } else {
-                throw new RuntimeException("Invalid verification code");
+                throw new RuntimeException("Cod de verificare invalid");
             }
         } else {
-            throw new RuntimeException("User not found");
+            throw new RuntimeException("Utilizatorul nu a fost găsit");
         }
     }
 
@@ -158,7 +154,4 @@ public class AuthService {
         user.setResetTokenExpiresAt(null);
         userRepository.save(user);
     }
-
-
-
 }

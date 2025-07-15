@@ -1,21 +1,15 @@
 package project.address;
 
-
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import project.user.User;
-import project.user.UserRepository;
 import java.util.List;
 
 @Service
 public class AddressService {
 
     private final AddressRepository addressRepository;
-    private final UserRepository userRepository;
 
-    public AddressService( AddressRepository addressRepository, UserRepository userRepository) {
+    public AddressService( AddressRepository addressRepository) {
         this.addressRepository = addressRepository;
-        this.userRepository = userRepository;
     }
 
     public Address create(Address address) {
@@ -44,12 +38,5 @@ public class AddressService {
         Address existingAddress = addressRepository.findById(id).orElseThrow(() -> new RuntimeException("Address not found"));
 
         addressRepository.delete(existingAddress);
-    }
-
-    public List<Address> getAddressForUser(String username) {
-        User user = userRepository.findByEmail(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-
-        return addressRepository.findAllByUser(user);
     }
 }

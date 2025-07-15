@@ -3,6 +3,7 @@ package project.room;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import project.dto.ExternalRoomDTO;
 import project.reservations.ReservationRepository;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -43,7 +44,7 @@ public class RoomService {
 
     public Room getRoomById(int id) {
         return roomRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Room not found with id: " + id));
+                .orElseThrow(() -> new RuntimeException("Camera nu a fost găsită: " + id));
     }
 
     @Transactional
@@ -69,7 +70,7 @@ public class RoomService {
 
     public Room addImageUrls(int roomId, List<String> newUrls) {
         Room room = roomRepository.findById(roomId)
-                .orElseThrow(() -> new RuntimeException("Room not found"));
+                .orElseThrow(() -> new RuntimeException("Camera nu a fost găsită"));
 
         if (room.getImageUrls() == null) {
             room.setImageUrls(new ArrayList<>());
@@ -78,5 +79,19 @@ public class RoomService {
         room.getImageUrls().addAll(newUrls);
         return roomRepository.save(room);
     }
+
+    public List<ExternalRoomDTO> getRoomsForExternal(LocalDate checkIn, LocalDate checkOut, int numberOfPeople) {
+        List<Room> availableRooms = findAvailableRooms(checkIn, checkOut, numberOfPeople);
+        return availableRooms.stream()
+                .map(room -> new ExternalRoomDTO(
+                        room.getId(),
+                        room.getNumber(),
+                        room.getPricePerNight(),
+                        room.getCapacity(),
+                        List.of("WiFi", "AC", "TV")
+                ))
+                .collect(Collectors.toList());
+    }
+
 }
 

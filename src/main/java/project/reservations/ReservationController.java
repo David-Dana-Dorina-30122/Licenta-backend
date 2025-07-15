@@ -1,6 +1,5 @@
 package project.reservations;
 
-
 import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -8,6 +7,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import project.dto.ReservationDTO;
@@ -18,7 +18,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/reservations")
-@CrossOrigin(origins = "http://localhost:4200")
 public class ReservationController {
 
     private final ReservationService reservationService;
@@ -39,6 +38,11 @@ public class ReservationController {
         List<Reservation> reservations = reservationService.getReservationsForUsername(username);
 
         return ResponseEntity.ok(reservations);
+    }
+
+    @GetMapping("/{id}")
+    public Reservation getReservationById(@PathVariable int id) {
+        return reservationService.getById(id);
     }
 
     @PostMapping("/create")
@@ -124,7 +128,6 @@ public class ReservationController {
 
         res.setCheckedInAt(LocalDateTime.now());
         reservationRepository.save(res);
-
 
         return ResponseEntity.ok("Check-in efectuat cu succes!");
     }

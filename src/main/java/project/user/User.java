@@ -1,8 +1,6 @@
 package project.user;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,7 +11,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import project.address.Address;
 import project.reservations.Reservation;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -52,10 +49,9 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private Role role = Role.ROLE_USER;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     @JsonIgnore
-//    @JsonManagedReference
     private List<Reservation> reservations = new ArrayList<>();
 
     @Column(name = "verification_code")
@@ -71,7 +67,6 @@ public class User implements UserDetails {
     public User(String email, String password) {
         this.email = email;
         this.password = password;
-       // this.enabled = false;
     }
 
     public User(String email, String password, String firstName, String lastName, String phone) {
@@ -80,7 +75,6 @@ public class User implements UserDetails {
         this.firstName = firstName;
         this.lastName = lastName;
         this.phone = phone;
-        // this.enabled = false;
     }
 
     public boolean getEnabled() {
@@ -92,6 +86,7 @@ public class User implements UserDetails {
 
 
     @Override
+    @JsonIgnore
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role.name()));
     }

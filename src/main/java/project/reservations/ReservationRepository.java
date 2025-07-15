@@ -1,7 +1,6 @@
 package project.reservations;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -21,9 +20,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Intege
                                                   @Param("checkOut") Date checkOut);
 
     List<Reservation> findByUser(User user);
-
-    List<Reservation> findByRoomIdAndDataCheckInBetweenOrDataCheckOutBetween(int room_id, Date dataCheckIn, Date dataCheckIn2, Date dataCheckOut, Date dataCheckOut2);
-
 
     Optional<Reservation> findByCheckedInToken(String token);
 

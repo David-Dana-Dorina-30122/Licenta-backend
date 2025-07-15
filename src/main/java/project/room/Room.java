@@ -38,12 +38,9 @@ public class Room {
     @Column(name = "image_url",length = 1000)
     private List<String> imageUrls = new ArrayList<>();
 
-
-
     @OneToMany(mappedBy = "room", fetch = FetchType.EAGER,cascade = CascadeType.ALL)
     @JsonIgnore
     @ToString.Exclude
-   // @JsonManagedReference
     private List<Reservation> reservations;
 
 }

@@ -4,8 +4,6 @@ package project.restaurant;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import project.dto.RestaurantDTO;
-
 import java.util.List;
 
 @RestController
@@ -18,17 +16,6 @@ public class RestaurantController {
         this.restaurantService = restaurantService;
     }
 
-//    @PostMapping("/addFood")
-//    public ResponseEntity<Restaurant> addFood(@RequestBody RestaurantDTO dto) {
-//        System.out.println("DTO: " + dto);
-//        Restaurant restaurant = new Restaurant();
-//        restaurant.setFoodName(dto.getFoodName());
-//        restaurant.setPhotoURL(dto.getPhotoURL());
-//        restaurant.setDescription(dto.getDescription());
-//
-//        Restaurant createdFood = restaurantService.addFood(restaurant);
-//        return ResponseEntity.ok(createdFood);
-//    }
 
     @PostMapping("/addFood")
     public ResponseEntity<Restaurant> createRestaurant(@Valid @RequestBody Restaurant restaurant) {

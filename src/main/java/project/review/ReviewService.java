@@ -1,7 +1,7 @@
 package project.review;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import project.dto.ReviewDTO;
 import project.reservations.Reservation;
 import project.reservations.ReservationRepository;
 
@@ -35,5 +35,9 @@ public class ReviewService {
 
     public List<Review> getReviewsByReservationId(int reservationId) {
         return reviewRepository.findByReservationId(reservationId);
+    }
+
+    public List<ReviewDTO> getAllReviews() {
+        return reviewRepository.getAllReviews();
     }
 }

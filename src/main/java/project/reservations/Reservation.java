@@ -1,9 +1,7 @@
 package project.reservations;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import jdk.jfr.Timestamp;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -62,15 +60,11 @@ public class Reservation {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")
     @ToString.Exclude
-//    @JsonIgnore
-//    @JsonBackReference
     private User user;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "room_id")
     @ToString.Exclude
-//    @JsonIgnore
-   // @JsonBackReference
     private Room room;
 
     @OneToOne(mappedBy = "reservation", cascade = CascadeType.ALL, orphanRemoval = true)

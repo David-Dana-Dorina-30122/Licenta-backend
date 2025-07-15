@@ -4,7 +4,6 @@ import com.google.zxing.BarcodeFormat;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
-import jakarta.mail.MessagingException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -18,12 +17,10 @@ import project.security.EmailService;
 import project.user.User;
 import project.user.UserRepository;
 import project.user.UserService;
-
 import java.io.ByteArrayOutputStream;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
-
 
 @Service
 @Slf4j
@@ -48,21 +45,22 @@ public class ReservationService {
         return reservationRepository.save(reservation);
     }
 
-
-    public Reservation createReservationForUser(ReservationDTO dto, String username) throws MessagingException {
+    public Reservation createReservationForUser(ReservationDTO dto, String username) {
         User user = userRepository.findByEmail(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        Room room = roomRepository.findById(dto.getRoomId())
-                .orElseThrow(() -> new RuntimeException("Room not found"));
+//        Room room = roomRepository.findById(dto.getRoomId())
+//                .orElseThrow(() -> new RuntimeException("Room not found"));
 
+
+
+        Room room = roomRepository.findByIdWithLock(dto.getRoomId());
         List<Reservation> conflicts = reservationRepository.findConflictingReservations(
                 room.getId(), dto.getDataCheckIn(), dto.getDataCheckOut());
 
         if (!conflicts.isEmpty()) {
             throw new RuntimeException("Room is already booked for the selected dates");
         }
-
 
         Reservation reservation = new Reservation();
         reservation.setDataCheckIn(dto.getDataCheckIn());
@@ -75,23 +73,26 @@ public class ReservationService {
         reservation.setUser(user);
         reservation.setStatus(ReservationStatus.ACTIVE);
         reservation.setCheckedInToken(UUID.randomUUID().toString());
-
-//        room.setStatus(Availability.UNAVAILABLE);
         room = roomRepository.save(room);
-        reservation.setRoom(room);
+//        reservation.setRoom(room);
 
-        String subject = "Rezervare";
-        String message = "Rezervarea dumneavoastră a fost procesată";
 
-        emailService.sendVerificationEmail(user.getEmail(),subject,message);
+        try {
+            String checkInUrl = "https://licenta-backend-production-d411.up.railway.app/reservations/checkin/" + reservation.getCheckedInToken();
+            byte[] qrImage = generateQRCodeImage(checkInUrl, 300, 300);
+
+            emailService.sendQRCodeEmail(reservation.getUser().getEmail(), qrImage);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         return reservationRepository.save(reservation);
-    }
 
+    }
 
     public List<Reservation> getReservationsForUsername(String username) {
         User user = userRepository.findByEmail(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+                .orElseThrow(() -> new UsernameNotFoundException("Utilizatorul nu a fost găsit"));
 
         return reservationRepository.findByUser(user);
     }
@@ -101,12 +102,12 @@ public class ReservationService {
     }
 
     public Reservation getById(int id){
-        return reservationRepository.findById(id).orElse(null);
+        return reservationRepository.findById(id).orElseThrow(() -> new UsernameNotFoundException("Rezervarea nu a fost găsită"));
     }
 
     public Reservation update(int id, Reservation newReservation) {
             Reservation existingReservation = reservationRepository.findById(id)
-                    .orElseThrow(() -> new RuntimeException("Reservation not found with id: " + id));
+                    .orElseThrow(() -> new RuntimeException("Rezervarea nu a fost gasita: " + id));
 
             if(newReservation.getDataCheckIn() != null){
                 existingReservation.setDataCheckIn(newReservation.getDataCheckIn());
@@ -134,7 +135,7 @@ public class ReservationService {
     @Transactional
     public void delete(int id) {
         Reservation existingReservation = reservationRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Reservation not found"));
+                .orElseThrow(() -> new RuntimeException("Rezervarea nu a fost gasita"));
 
         System.out.println("Deleting reservation: " + existingReservation);
 
@@ -160,7 +161,7 @@ public class ReservationService {
         reservation.setStatus(ReservationStatus.ACTIVE);
 
         Room room = roomRepository.findById(dto.getRoomId())
-                .orElseThrow(() -> new RuntimeException("Room not found"));
+                .orElseThrow(() -> new RuntimeException("Camera nu a fost gasita"));
         reservation.setRoom(room);
 
         User externalUser = userService.findOrCreateExternalUser(dto.getGuestEmail());
@@ -169,7 +170,7 @@ public class ReservationService {
         reservationRepository.save(reservation);
 
         try {
-            String checkInUrl = "http://172.20.10.1/reservations/checkin/" + reservation.getCheckedInToken();
+            String checkInUrl = "https://licenta-backend-production-d411.up.railway.app/reservations/checkin/" + reservation.getCheckedInToken();
             byte[] qrImage = generateQRCodeImage(checkInUrl, 300, 300);
 
             emailService.sendQRCodeEmail(reservation.getUser().getEmail(), qrImage);
@@ -177,7 +178,6 @@ public class ReservationService {
             e.printStackTrace();
         }
     }
-
 
 
     public byte[] generateQRCodeImage(String text, int width, int height) throws Exception {

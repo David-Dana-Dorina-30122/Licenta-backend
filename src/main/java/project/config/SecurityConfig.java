@@ -3,9 +3,9 @@ package project.config;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -16,21 +16,20 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @EnableWebSecurity
 public class SecurityConfig{
 
-    private final AuthenticationProvider authenticationProvider;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-
+    private final ApiKeyAuthFilter apiKeyAuthFilter;
     public SecurityConfig(
             JwtAuthenticationFilter jwtAuthenticationFilter,
-            AuthenticationProvider authenticationProvider //ignore Bean warning we will get to that
+            ApiKeyAuthFilter apiKeyAuthFilter
     ) {
-        this.authenticationProvider = authenticationProvider;
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.apiKeyAuthFilter = apiKeyAuthFilter;
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())
+                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(
                                 "/v3/api-docs/**",
@@ -41,6 +40,7 @@ public class SecurityConfig{
                                 "/webjars/**"
                         ).permitAll()
                         .requestMatchers("/rooms/create").hasRole("ADMIN")
+                        .requestMatchers("/users/role/*").hasRole("ADMIN")
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/reservations/check-in/**").permitAll()
                         .requestMatchers("/reservations/**").authenticated()
@@ -61,11 +61,9 @@ public class SecurityConfig{
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-                .authenticationProvider(authenticationProvider)
+                .addFilterBefore(apiKeyAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .cors(withDefaults());
-
-
         return http.build();
     }
 }

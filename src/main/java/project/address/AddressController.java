@@ -14,7 +14,6 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/addresses")
-@CrossOrigin(origins = "http://localhost:4200")
 public class AddressController {
 
     public final AddressService addressService;
@@ -103,31 +102,13 @@ public class AddressController {
 
     @PutMapping("/update")
     public ResponseEntity<Address> updateAddress(@RequestBody Address updatedAddress, @AuthenticationPrincipal User user) {
-        System.out.println("Received address: " + updatedAddress); // Log pentru verificare
+        System.out.println("Received address: " + updatedAddress);
         Address address = addressRepository.findByUser(user).orElseThrow();
         address.setStreet(updatedAddress.getStreet());
         address.setCity(updatedAddress.getCity());
         address.setCountry(updatedAddress.getCountry());
         return ResponseEntity.ok(addressRepository.save(address));
     }
-
-
-
-
-//    @PutMapping("/update")
-//    public ResponseEntity<Address> updateAddress(@RequestBody Address updatedAddress, @RequestHeader("Authorization") String authHeader) {
-//        String token = authHeader.substring(7);
-//        String email = jwtService.extractUsername(token);
-//        User user = userRepository.findByEmail(email).orElseThrow();
-//
-//        Address address = addressRepository.findByUser(user).orElseThrow();
-//        address.setStreet(updatedAddress.getStreet());
-//        address.setCity(updatedAddress.getCity());
-//        address.setCountry(updatedAddress.getCountry());
-//
-//        return ResponseEntity.ok(addressRepository.save(address));
-//    }
-
 
     @DeleteMapping("/{id}")
     public void deleteAddress(@PathVariable int id) {
